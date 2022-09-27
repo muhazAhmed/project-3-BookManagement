@@ -217,7 +217,7 @@ const updateBook = async function (req, res) {
         let update = {}
         if (!req.body.title) {
         } else {
-            req.body.title = req.body.title.trim()
+            if(typeof req.body.title=="string"){
             if (!(/^[a-zA-z0-9 !&?]{2,50}$/).test(req.body.title)) {
                 // return res.status(400).send({status:false,message:"Title must be a valid title"})
                 text = "Title must be a valid title"
@@ -229,16 +229,23 @@ const updateBook = async function (req, res) {
                 }
             }
             update.title = req.body.title
+        }else{
+            text="title must be in string"
+        }
         }
 
         if (!req.body.excerpt) {
         } else {
+            if(typeof req.body.excerpt=="string"){
             req.body.excerpt = req.body.excerpt.trim()
             if (!(/^[a-zA-z !&?]{2,100}$/).test(req.body.excerpt)) {
                 // return res.status(400).send({status:false,message:"Excerpt must consist of only letters"})
-                text = (text.length == 0) ? "Excerpt must consist of only letters" : text + " ; " + "Excerpt must consist of only letters"
+                text = (text.length == 0) ? "Excerpt must a valid excerpt." : text + " ; " + "Excerpt must a valid excerpt."
             }
             update.excerpt = req.body.excerpt
+        }else{
+            text = (text.length == 0) ? "Excerpt must be in string." : text + " ; " + "Excerpt must be in string."
+        }
         }
 
         if (!req.body.releasedAt) {
@@ -247,7 +254,6 @@ const updateBook = async function (req, res) {
                 // return res.status(400).send({status:false,message:"Please provide valid date in format YYYY-MM-DD"})
                 text = (text.length == 0) ? "Please provide valid date in format YYYY-MM-DD" : text + " ; " + "Please provide valid date in format YYYY-MM-DD"
             } else {
-                req.body.releasedAt = req.body.releasedAt.trim()
                 let date = moment(req.body.releasedAt)
                 // console.log(date);
                 if (!date.isValid()) {
@@ -267,6 +273,7 @@ const updateBook = async function (req, res) {
 
         if (!req.body.ISBN) {
         } else {
+            if(typeof req.body.ISBN=="string"){
             req.body.ISBN = req.body.ISBN.trim()
             if (!(/^[0-9]{3}([\-])[0-9]{10}$/).test(req.body.ISBN)) {
                 // return res.status(400).send({status:false,message:"Please provide valid 13 digit valid ISBN number"})
@@ -279,6 +286,9 @@ const updateBook = async function (req, res) {
                 }
             }
             update.ISBN = req.body.ISBN
+        }else{
+            text = (text.length == 0) ? "ISBN must be in String" : text + " ; " + "ISBN must be in String"
+        }
         }
 
         if (text) {
