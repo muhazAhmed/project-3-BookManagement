@@ -2,9 +2,27 @@
 const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel.js')
 const Validator = require("../validation/validfun")
+const awsFunction= require("./awsFunction")
 const reviewModel = require('../models/reviewModel.js')
 let mongoose = require("mongoose")
 let moment = require("moment")
+
+
+const generatecoverLink = async function (req, res) {
+    try {
+        let files = req.files
+        if (files && files.length > 0) {
+            let genURL = await awsFunction.uploadFile(files[0])
+            res.status(201).send({ message: "Image is uploaded", data: genURL });
+        }else{
+            res.status(400).send({message:'No file found'})
+        }
+    }
+    catch (err) {
+        res.status(500).send({message:err})
+    }
+
+}
 
 const createBook = async function (req, res) {
     try {
@@ -217,35 +235,35 @@ const updateBook = async function (req, res) {
         let update = {}
         if (!req.body.title) {
         } else {
-            if(typeof req.body.title=="string"){
-            if (!(/^[a-zA-z0-9 !&?]{2,50}$/).test(req.body.title)) {
-                // return res.status(400).send({status:false,message:"Title must be a valid title"})
-                text = "Title must be a valid title"
-            } else {
-                let title = await bookModel.findOne({ title: req.body.title })
-                if (title) {
-                    // return res.status(400).send({status:false,message:"Title is already present, Title must be unique."})
-                    text = "Title is already present, Title must be unique."
+            if (typeof req.body.title == "string") {
+                if (!(/^[a-zA-z0-9 !&?]{2,50}$/).test(req.body.title)) {
+                    // return res.status(400).send({status:false,message:"Title must be a valid title"})
+                    text = "Title must be a valid title"
+                } else {
+                    let title = await bookModel.findOne({ title: req.body.title })
+                    if (title) {
+                        // return res.status(400).send({status:false,message:"Title is already present, Title must be unique."})
+                        text = "Title is already present, Title must be unique."
+                    }
                 }
+                update.title = req.body.title
+            } else {
+                text = "title must be in string"
             }
-            update.title = req.body.title
-        }else{
-            text="title must be in string"
-        }
         }
 
         if (!req.body.excerpt) {
         } else {
-            if(typeof req.body.excerpt=="string"){
-            req.body.excerpt = req.body.excerpt.trim()
-            if (!(/^[a-zA-z !&?]{2,100}$/).test(req.body.excerpt)) {
-                // return res.status(400).send({status:false,message:"Excerpt must consist of only letters"})
-                text = (text.length == 0) ? "Excerpt must a valid excerpt." : text + " ; " + "Excerpt must a valid excerpt."
+            if (typeof req.body.excerpt == "string") {
+                req.body.excerpt = req.body.excerpt.trim()
+                if (!(/^[a-zA-z !&?]{2,100}$/).test(req.body.excerpt)) {
+                    // return res.status(400).send({status:false,message:"Excerpt must consist of only letters"})
+                    text = (text.length == 0) ? "Excerpt must a valid excerpt." : text + " ; " + "Excerpt must a valid excerpt."
+                }
+                update.excerpt = req.body.excerpt
+            } else {
+                text = (text.length == 0) ? "Excerpt must be in string." : text + " ; " + "Excerpt must be in string."
             }
-            update.excerpt = req.body.excerpt
-        }else{
-            text = (text.length == 0) ? "Excerpt must be in string." : text + " ; " + "Excerpt must be in string."
-        }
         }
 
         if (!req.body.releasedAt) {
@@ -273,22 +291,22 @@ const updateBook = async function (req, res) {
 
         if (!req.body.ISBN) {
         } else {
-            if(typeof req.body.ISBN=="string"){
-            req.body.ISBN = req.body.ISBN.trim()
-            if (!(/^[0-9]{3}([\-])[0-9]{10}$/).test(req.body.ISBN)) {
-                // return res.status(400).send({status:false,message:"Please provide valid 13 digit valid ISBN number"})
-                text = (text.length == 0) ? "Please provide valid 13 digit valid ISBN number" : text + " ; " + "Please provide valid 13 digit valid ISBN number"
-            } else {
-                let ISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
-                if (ISBN) {
-                    // return res.status(400).send({status:false,message:"Please provide unique ISBN number"})
-                    text = (text.length == 0) ? "Please provide unique ISBN number" : text + " ; " + "Please provide unique ISBN number"
+            if (typeof req.body.ISBN == "string") {
+                req.body.ISBN = req.body.ISBN.trim()
+                if (!(/^[0-9]{3}([\-])[0-9]{10}$/).test(req.body.ISBN)) {
+                    // return res.status(400).send({status:false,message:"Please provide valid 13 digit valid ISBN number"})
+                    text = (text.length == 0) ? "Please provide valid 13 digit valid ISBN number" : text + " ; " + "Please provide valid 13 digit valid ISBN number"
+                } else {
+                    let ISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
+                    if (ISBN) {
+                        // return res.status(400).send({status:false,message:"Please provide unique ISBN number"})
+                        text = (text.length == 0) ? "Please provide unique ISBN number" : text + " ; " + "Please provide unique ISBN number"
+                    }
                 }
+                update.ISBN = req.body.ISBN
+            } else {
+                text = (text.length == 0) ? "ISBN must be in String" : text + " ; " + "ISBN must be in String"
             }
-            update.ISBN = req.body.ISBN
-        }else{
-            text = (text.length == 0) ? "ISBN must be in String" : text + " ; " + "ISBN must be in String"
-        }
         }
 
         if (text) {
@@ -328,6 +346,10 @@ const deleteBook = async function (req, res) {
 }
 
 
-module.exports = { createBook, getBookByQuery, getBookById, deleteBook, updateBook }
 
 
+module.exports = { createBook, getBookByQuery, getBookById, deleteBook, updateBook, generatecoverLink }
+
+
+// accessKeyId: "AKIAY3L35MCRVFM24Q7U",
+//     secretAccessKeyId: "qGG1HE0qRixcW1T1Wg1bv+08tQrIkFVyDFqSft4J"

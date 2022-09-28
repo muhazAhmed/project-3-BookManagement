@@ -5,6 +5,7 @@ let ObjectID = mongoose.Types.ObjectId
 
 const authenticate = function (req, res, next) {
     try {
+        console.log(req.files)
 
         let token = req.headers["x-api-key"]
         if (!token) {
