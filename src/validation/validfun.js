@@ -11,10 +11,6 @@ const isValid = function (value) {
     return true
 }
 
-// const isTitleValid= function(value){
-//     if (value == "Mr" ||value =="Miss" ||value =="Mrs") return true
-//     return false
-// }
 
 const isValidTitle = function (title,inp) {
     return (inp.indexOf(title) !== -1);
